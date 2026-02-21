@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wildlife Forest</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial, sans-serif;
+}
+
+/* FULL SCREEN FOREST */
+#forest{
+    width:100vw;
+    height:100vh;
+    background:url("forest.jpg") no-repeat center center;
+    background-size:cover;
+    position:relative;
+}
+
+/* TOP CONTROLS */
+#controls{
+    position:absolute;
+    top:15px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:15px;
+    z-index:1000;
+}
+
+button{
+    padding:8px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background:#2e8b57;
+    color:white;
+    font-size:14px;
+}
+
+/* ANIMAL PANEL */
+#animals{
+    position:absolute;
+    top:80px;
+    right:20px;
+    width:120px;
+    height:70vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:10px;
+    background:rgba(255,255,255,0.3);
+    backdrop-filter:blur(6px);
+    border-radius:12px;
+    z-index:1000;
+}
+
+.animal{
+    width:70px;
+    cursor:grab;
+    transition:transform 0.3s;
+}
+
+.animal:hover{
+    transform:scale(1.1);
+}
+
+/* PLACED ANIMAL */
+.placed{
+    position:absolute;
+    width:140px;
+    cursor:pointer;
+}
+
+/* RAIN */
+.raindrop{
+    position:absolute;
+    width:2px;
+    height:18px;
+    background:white;
+    animation: fall linear infinite;
+}
+
+@keyframes fall{
+    from{ transform:translateY(0); }
+    to{ transform:translateY(100vh); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="forest">
+
+    <!-- CONTROLS -->
+    <div id="controls">
+        <button onclick="toggleDayNight()">🌙 Day / Night</button>
+        <button onclick="toggleRain()">🌧 Rain</button>
+        <button onclick="resetForest()">🔄 Reset</button>
+    </div>
+
+    <!-- ANIMAL PANEL -->
+    <div id="animals">
+        <img src="eagle.png" class="animal" draggable="true">
+        <img src="elephant.png" class="animal" draggable="true">
+        <img src="lion.png" class="animal" draggable="true">
+        <img src="zebra.png" class="animal" draggable="true">
+        <img src="rhino.png" class="animal" draggable="true">
+        <img src="deer.png" class="animal" draggable="true">
+        <img src="giraffe.png" class="animal" draggable="true">
+        <img src="tiger.png" class="animal" draggable="true">
+        <img src="bear.png" class="animal" draggable="true">
+    </div>
+
+</div>
+
+<script>
+
+let draggedAnimal = null;
+let isNight = false;
+let raining = false;
+let rainInterval;
+
+const forest = document.getElementById("forest");
+
+/* DRAG FUNCTION */
+document.querySelectorAll(".animal").forEach(item=>{
+    item.addEventListener("dragstart",function(){
+        draggedAnimal = this.cloneNode(true);
+        draggedAnimal.classList.remove("animal");
+        draggedAnimal.classList.add("placed");
+
+        /* Eagle smaller */
+        if(this.src.includes("eagle")){
+            draggedAnimal.style.width = "100px";
+        }
+
+        /* Double click delete */
+        draggedAnimal.addEventListener("dblclick",function(){
+            this.remove();
+        });
+    });
+});
+
+forest.addEventListener("dragover",e=>e.preventDefault());
+
+forest.addEventListener("drop",function(e){
+    e.preventDefault();
+    if(draggedAnimal){
+        draggedAnimal.style.left = e.clientX - 70 + "px";
+        draggedAnimal.style.top = e.clientY - 70 + "px";
+        forest.appendChild(draggedAnimal);
+    }
+});
+
+/* DAY NIGHT IMAGE SWITCH */
+function toggleDayNight(){
+    if(!isNight){
+        forest.style.backgroundImage = "url('nightforest.jpg')";
+        isNight = true;
+    }else{
+        forest.style.backgroundImage = "url('forest.jpg')";
+        isNight = false;
+    }
+}
+
+/* RAIN MODE */
+function toggleRain(){
+    raining = !raining;
+
+    if(raining){
+        rainInterval = setInterval(()=>{
+            let drop = document.createElement("div");
+            drop.classList.add("raindrop");
+            drop.style.left = Math.random()*window.innerWidth+"px";
+            drop.style.animationDuration = (0.5 + Math.random())+"s";
+            forest.appendChild(drop);
+
+            setTimeout(()=>drop.remove(),1000);
+        },40);
+    }else{
+        clearInterval(rainInterval);
+    }
+}
+
+/* RESET */
+function resetForest(){
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>
